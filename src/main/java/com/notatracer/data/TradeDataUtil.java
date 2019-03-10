@@ -1,5 +1,6 @@
 package com.notatracer.data;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.notatracer.data.model.*;
 import net.andreinc.mockneat.MockNeat;
 import net.andreinc.mockneat.abstraction.MockUnit;
@@ -11,6 +12,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -78,17 +80,32 @@ public class TradeDataUtil {
                 );
     }
 
-    public static void main(String[] args) {
+    public static Trade getTrade() {
         MockNeat mock = MockNeat.threadLocal();
-//        IntStream.range(1, 10)
-//                .forEach(x ->
-//                        System.out.println(getTradeGenerator(mock).get())
-//                );
+        return getTradeGenerator(mock).get();
+    }
 
-        getNTrades(20).stream().forEach(
+    public static List<Map> getNTradeMaps(int number) {
+        MockNeat mock = MockNeat.threadLocal();
+        MockUnit<Trade> tradeGenerator = getTradeGenerator(mock);
+        ObjectMapper mapper = new ObjectMapper();
+        List<Map> tradeListOfMaps = IntStream.range(1, number)
+                .mapToObj(
+                        x -> tradeGenerator.get()
+                )
+                .map(t ->  {
+                    return mapper.convertValue(t, Map.class);
+                })
+                .collect(Collectors.toList());
+        return tradeListOfMaps;
+    }
+
+    public static void main(String[] args) {
+//        MockNeat mock = MockNeat.threadLocal();
+
+        getNTradeMaps(20).stream().forEach(
                 t -> System.out.println(t)
         );
 
     }
-
 }
